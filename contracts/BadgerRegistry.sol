@@ -9,7 +9,7 @@ contract BadgerRegistry {
   using EnumerableSet for EnumerableSet.AddressSet;
 
   //@dev is the vault at the experimental, guarded or open stage? Only for Prod Vaults
-  enum VaultStatus { experimental, guarded, open }
+  enum VaultStatus { experimental, guarded, open, discontinued }
 
   struct VaultData {
     string version;
@@ -21,7 +21,7 @@ contract BadgerRegistry {
   address public governance;
   address public devGovernance; //@notice an address with some powers to make things easier in development
 
-  //@dev Given an Author Address, and Token, Return the Vault
+  //@dev Given an Author Address, and Version, Return the Vault
   mapping(address => mapping(string => EnumerableSet.AddressSet)) private vaults;
   mapping(string => address) public addresses;
 
@@ -91,6 +91,7 @@ contract BadgerRegistry {
   //@dev Promote just means indexed by the Governance Address
   function promote(string memory version, address vault, VaultStatus status) public {
     require(msg.sender == governance || msg.sender == devGovernance, "!gov");
+    require(status != VaultStatus.discontinued);
 
     VaultStatus actualStatus = status;
     if(msg.sender == devGovernance) {
